@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Allenamenti Personalizzati</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #121212;
+    color: #e0e0e0;
+    margin: 0; padding: 0;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh;
+  }
+  header {
+    background: #00875a;
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  main {
+    width: 90%;
+    max-width: 700px;
+    margin-top: 20px;
+  }
+  button {
+    cursor: pointer;
+    background: #00cc77;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    font-weight: 600;
+    color: white;
+    margin: 5px;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background: #009955;
+  }
+  .schede-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  .scheda-btn {
+    flex: 1 1 150px;
+    max-width: 180px;
+  }
+  #custom-scheda-form {
+    background: #1f1f1f;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+  }
+  #custom-scheda-form input, #custom-scheda-form select {
+    padding: 8px;
+    margin: 5px 10px 10px 0;
+    border-radius: 5px;
+    border: none;
+    font-size: 1rem;
+  }
+  #custom-scheda-form label {
+    font-weight: 600;
+    margin-right: 5px;
+  }
+  #exercises-list {
+    margin-top: 15px;
+  }
+  .exercise-item {
+    display: flex;
+    justify-content: space-between;
+    background: #292929;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+  }
+  .exercise-item span {
+    flex: 1;
+  }
+  .remove-btn {
+    background: #cc0000;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    width: 22px;
+    height: 22px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  #scheda-display {
+    background: #222;
+    border-radius: 10px;
+    padding: 15px;
+  }
+  #scheda-display h3 {
+    margin-top: 0;
+  }
+  #scheda-display ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  #scheda-display li {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: #333;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+
+<header>Allenamenti Personalizzati</header>
+
+<main>
+  <div class="schede-container">
+    <button class="scheda-btn" data-scheda="20">Scheda 20 Minuti</button>
+    <button class="scheda-btn" data-scheda="45">Scheda 45 Minuti</button>
+    <button class="scheda-btn" data-scheda="60">Scheda 1 Ora</button>
+  </div>
+
+  <section id="custom-scheda-form">
+    <h3>Crea la tua scheda</h3>
+    <form id="add-exercise-form">
+      <input type="text" id="exercise-name" placeholder="Nome esercizio" required />
+      <select id="exercise-type">
+        <option value="reps">Ripetizioni</option>
+        <option value="time">Tempo (sec)</option>
+      </select>
+      <input type="number" id="exercise-value" placeholder="Quantità" min="1" required />
+      <button type="submit">Aggiungi esercizio</button>
+    </form>
+    <div id="exercises-list"></div>
+    <button id="save-scheda-btn" style="margin-top:10px;">Salva Scheda Personalizzata</button>
+  </section>
+
+  <section id="scheda-display" style="display:none;">
+    <h3>Scheda Allenamento</h3>
+    <ul id="scheda-exercises"></ul>
+  </section>
+</main>
+
+<script>
+  const schedePredefinite = {
+    20: [
+      {name: 'Jumping Jacks', type: 'time', value: 60},
+      {name: 'Push-ups', type: 'reps', value: 15},
+      {name: 'Squat', type: 'reps', value: 20},
+      {name: 'Plank', type: 'time', value: 45},
+      {name: 'Mountain Climbers', type: 'time', value: 60},
+    ],
+    45: [
+      {name: 'Jump Rope', type: 'time', value: 120},
+      {name: 'Push-ups', type: 'reps', value: 30},
+      {name: 'Lunges', type: 'reps', value: 25},
+      {name: 'Plank', type: 'time', value: 90},
+      {name: 'Burpees', type: 'reps', value: 20},
+      {name: 'Sit-ups', type: 'reps', value: 30},
+    ],
+    60: [
+      {name: 'Jump Rope', type: 'time', value: 180},
+      {name: 'Push-ups', type: 'reps', value: 40},
+      {name: 'Lunges', type: 'reps', value: 35},
+      {name: 'Plank', type: 'time', value: 120},
+      {name: 'Burpees', type: 'reps', value: 30},
+      {name: 'Sit-ups', type: 'reps', value: 40},
+      {name: 'Jumping Jacks', type: 'time', value: 90},
+    ]
+  };
+
+  const schedaButtons = document.querySelectorAll('.scheda-btn');
+  const schedaDisplay = document.getElementById('scheda-display');
+  const schedaExercises = document.getElementById('scheda-exercises');
+
+  const addExerciseForm = document.getElementById('add-exercise-form');
+  const exerciseNameInput = document.getElementById('exercise-name');
+  const exerciseTypeSelect = document.getElementById('exercise-type');
+  const exerciseValueInput = document.getElementById('exercise-value');
+  const exercisesListDiv = document.getElementById('exercises-list');
+  const saveSchedaBtn = document.getElementById('save-scheda-btn');
+
+  let customExercises = JSON.parse(localStorage.getItem('customExercises')) || [];
+
+  function renderScheda(exercises) {
+    schedaExercises.innerHTML = '';
+    exercises.forEach((ex, i) => {
+      const li = document.createElement('li');
+      li.textContent = `${ex.name} - ${ex.type === 'reps' ? ex.value + ' ripetizioni' : formatTime(ex.value)}`;
+      schedaExercises.appendChild(li);
+    });
+    schedaDisplay.style.display = 'block';
+  }
+
+  function formatTime(seconds) {
+    if(seconds < 60) return seconds + ' sec';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return secs === 0 ? `${mins} min` : `${mins} min ${secs} sec`;
+  }
+
+  // Mostra scheda predefinita
+  schedaButtons.forEach(btn => {
+    btn.onclick = () => {
+      const durata = btn.getAttribute('data-scheda');
+      renderScheda(schedePredefinite[durata]);
+    };
+  });
+
+  // Rendi la lista di esercizi personalizzati
+  function renderCustomList() {
+    exercisesListDiv.innerHTML = '';
+    if(customExercises.length === 0) {
+      exercisesListDiv.textContent = 'Nessun esercizio aggiunto.';
+      return;
+    }
+    customExercises.forEach((ex, idx) => {
+      const div = document.createElement('div');
+      div.classList.add('exercise-item');
+      div.innerHTML = `<span>${ex.name} - ${ex.type === 'reps' ? ex.value + ' ripetizioni' : formatTime(ex.value)}</span>
+        <button class="remove-btn" title="Rimuovi" data-index="${idx}">&times;</button>`;
+      exercisesListDiv.appendChild(div);
+    });
+
+    // Rimuovi esercizio
+    exercisesListDiv.querySelectorAll('.remove-btn').forEach(btn => {
+      btn.onclick = e => {
+        const index = e.target.getAttribute('data-index');
+        customExercises.splice(index, 1);
+        saveCustom();
+        renderCustomList();
+      };
+    });
+  }
+
+  // Salva esercizi custom su localStorage
+  function saveCustom() {
+    localStorage.setItem('customExercises', JSON.stringify(customExercises));
+  }
+
+  // Aggiungi nuovo esercizio
+  addExerciseForm.onsubmit = e => {
+    e.preventDefault();
+    const name = exerciseNameInput.value.trim();
+    const type = exerciseTypeSelect.value;
+    const value = Number(exerciseValueInput.value);
+
+    if(!name || value < 1) return;
+
+    customExercises.push({name, type, value});
+    saveCustom();
+    renderCustomList();
+
+    exerciseNameInput.value = '';
+    exerciseValueInput.value = '';
+  };
+
+  // Salva e mostra scheda personalizzata
+  saveSchedaBtn.onclick = () => {
+    if(customExercises.length === 0) {
+      alert('Aggiungi almeno un esercizio prima di salvare.');
+      return;
+    }
+    renderScheda(customExercises);
+  };
+
+  renderCustomList();
+</script>
+
+</body>
+</html>
