@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Allenamenti Pro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  body {
+    margin: 0; padding: 0;
+    background: #121212;
+    font-family: 'Poppins', sans-serif;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  header {
+    background: #0dbd8b;
+    width: 100%;
+    padding: 20px;
+    font-weight: 700;
+    font-size: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 8px #0dbd8b88;
+  }
+  main {
+    width: 90%;
+    max-width: 700px;
+    margin-top: 20px;
+  }
+  .schede-btns {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  button {
+    background: #0dbd8b;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    padding: 12px 18px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    box-shadow: 0 4px 6px #0dbd8b99;
+  }
+  button:hover {
+    background: #089e71;
+  }
+  #custom-scheda-section {
+    background: #1f1f1f;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 40px;
+  }
+  #custom-scheda-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-weight: 700;
+    text-align: center;
+  }
+  form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+  input, select {
+    font-size: 1rem;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    width: 180px;
+    background: #2b2b2b;
+    color: #eee;
+  }
+  input[type="number"] {
+    max-width: 100px;
+  }
+  #exercises-list {
+    max-height: 180px;
+    overflow-y: auto;
+    background: #292929;
+    border-radius: 12px;
+    padding: 10px 15px;
+  }
+  .exercise-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border-bottom: 1px solid #444;
+    color: #ccc;
+    font-weight: 600;
+  }
+  .exercise-item:last-child {
+    border-bottom: none;
+  }
+  .remove-btn {
+    background: #cc3300;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    line-height: 20px;
+    text-align: center;
+    box-shadow: 0 0 6px #cc3300aa;
+  }
+  #save-scheda-btn {
+    display: block;
+    margin: 0 auto;
+    background: #00b36e;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    box-shadow: 0 6px 12px #00b36eaa;
+  }
+  #timer-section {
+    display: none;
+    text-align: center;
+  }
+  #exercise-name {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  #timer {
+    font-size: 4rem;
+    font-weight: 700;
+    margin: 10px 0;
+    color: #0dbd8b;
+    text-shadow: 0 0 10px #0dbd8bbb;
+  }
+  #progress-bar {
+    height: 15px;
+    width: 100%;
+    background: #333;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 15px;
+  }
+  #progress-fill {
+    height: 100%;
+    width: 0;
+    background: #0dbd8b;
+    transition: width 0.25s linear;
+  }
+  #controls button {
+    margin: 0 8px;
+    background: #0dbd8b;
+    font-size: 1.2rem;
+    padding: 10px 16px;
+    box-shadow: 0 4px 6px #0dbd8b99;
+  }
+  #rest-time-input {
+    width: 120px;
+    margin: 10px auto 25px;
+    display: block;
+    background: #292929;
+    border-radius: 10px;
+    color: #eee;
+    border: none;
+    font-weight: 600;
+    padding: 8px 12px;
+  }
+</style>
+</head>
+<body>
+<header>Allenamenti Pro</header>
+<main>
+  <div class="schede-btns">
+    <button data-durata="20">Scheda 20 Minuti</button>
+    <button data-durata="45">Scheda 45 Minuti</button>
+    <button data-durata="60">Scheda 1 Ora</button>
+  </div>
+  <section id="custom-scheda-section">
+    <h3>Crea la tua scheda</h3>
+    <form id="add-exercise-form">
+      <input type="text" id="exercise-name-input" placeholder="Nome esercizio" required />
+      <select id="exercise-type-select">
+        <option value="reps">Ripetizioni</option>
+        <option value="time">Tempo (sec)</option>
+      </select>
+      <input type="number" id="exercise-value-input" min="1" placeholder="Quantità" required />
+      <button type="submit">Aggiungi esercizio</button>
+    </form>
+    <div id="exercises-list"></div>
+    <input type="number" id="rest-time-input" min="0" value="15" title="Secondi di riposo tra gli esercizi" />Secondi di riposo tra esercizi
+    <button id="save-scheda-btn">Salva e Avvia Scheda</button>
+  </section>
+  <section id="timer-section">
+    <div id="exercise-name"></div>
+    <div id="timer">00:00</div>
+    <div id="progress-bar"><div id="progress-fill"></div></div>
+    <div id="controls">
+      <button id="pause-btn">Pausa</button>
+      <button id="resume-btn" style="display:none;">Riprendi</button>
+      <button id="reset-btn">Reset</button>
+      <button id="stop-btn">Ferma</button>
+    </div>
+  </section>
+</main>
+
+<script>
+  const schedePredefinite = {
+    20: [
+      {name: 'Jumping Jacks', type: 'time', value: 60},
+      {name: 'Push-ups', type: 'reps', value: 15},
+      {name: 'Squat', type: 'reps', value: 20},
+      {name: 'Plank', type: 'time', value: 45},
+      {name: 'Mountain Climbers', type: 'time', value: 60},
+    ],
+    45: [
+      {name: 'Jump Rope', type: 'time', value: 120},
+      {name: 'Push-ups', type: 'reps', value: 30},
+      {name: 'Lunges', type: 'reps', value: 25},
+      {name: 'Plank', type: 'time', value: 90},
+      {name: 'Burpees', type: 'reps', value: 20},
+      {name: 'Sit-ups', type: 'reps', value: 30},
+    ],
+    60: [
+      {name: 'Jump Rope', type: 'time', value: 180},
+      {name: 'Push-ups', type: 'reps', value: 40},
+      {name: 'Lunges', type: 'reps', value: 35},
+      {name: 'Plank', type: 'time', value: 120},
+      {name: 'Burpees', type: 'reps', value: 30},
+      {name: 'Sit-ups', type: 'reps', value: 40},
+      {name: 'Jumping Jacks', type: 'time', value: 90},
+    ]
+  };
+
+  // UI elements
+  const schedaBtns = document.querySelectorAll('.schede-btns button');
+  const addExerciseForm = document.getElementById('add-exercise-form');
+  const exerciseNameInput = document.getElementById('exercise-name-input');
+  const exerciseTypeSelect = document.getElementById('exercise-type-select');
+  const exerciseValueInput = document.getElementById('exercise-value-input');
+  const exercisesListDiv = document.getElementById('exercises-list');
+  const saveSchedaBtn = document.getElementById('save-scheda-btn');
+  const restTimeInput = document.getElementById('rest-time-input');
+
+  const timerSection = document.getElementById('timer-section');
+  const exerciseNameDisplay = document.getElementById('exercise-name');
+  const timerDisplay = document.getElementById('timer');
+  const progressFill = document.getElementById('progress-fill');
+  const pauseBtn = document.getElementById('pause-btn');
+  const resumeBtn = document.getElementById('resume-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const stopBtn = document.getElementById('stop-btn');
+
+  let exercises = [];
+  let currentIndex = 0;
+  let timer = null;
+  let timeLeft = 0;
+  let isPaused = false;
+  let restTime = 15;
+  let isResting = false;
+
+  // Funzione per visualizzare gli esercizi personalizzati
+  function renderExercisesList() {
+    exercisesListDiv.innerHTML = '';
+    exercises.forEach((ex, i) => {
+      const div = document.createElement('div');
+      div.className = 'exercise-item';
+      div.textContent = `${ex.name} - ${ex.type === 'time' ? ex.value + ' sec' : ex.value + ' reps'}`;
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '×';
+      removeBtn.className = 'remove-btn';
+      removeBtn.onclick = () => {
+        exercises.splice(i,1);
+        renderExercisesList();
+      };
+      div.appendChild(removeBtn);
+      exercisesListDiv.appendChild(div);
+    });
+  }
+
+  // Aggiungi esercizio personalizzato
+  addExerciseForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = exerciseNameInput.value.trim();
+    const type = exerciseTypeSelect.value;
+    const value = parseInt(exerciseValueInput.value);
+    if(name && value > 0){
+      exercises.push({name, type, value});
+      renderExercisesList();
+      exerciseNameInput.value = '';
+      exerciseValueInput.value = '';
+    }
+  });
+
+  // Carica scheda predefinita
+  schedaBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      exercises = [...schedePredefinite[btn.dataset.durata]];
+      renderExercisesList();
+    });
+  });
+
+  // Funzioni timer e ciclo esercizi
+  function formatTime(s) {
+    const m = Math.floor(s / 60).toString().padStart(2,'0');
+    const sec = (s % 60).toString().padStart(2,'0');
+    return `${m}:${sec}`;
+  }
+
+  function startTimer(duration) {
+    timeLeft = duration;
+    updateTimerDisplay();
+    timer = setInterval(() => {
+      if(!isPaused){
+        timeLeft--;
+        updateTimerDisplay();
+        if(timeLeft <= 0){
+          clearInterval(timer);
+          nextExercise();
+        }
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    timerDisplay.textContent = formatTime(timeLeft);
+    let total = isResting ? restTime : (exercises[currentIndex]?.type === 'time' ? exercises[currentIndex].value : 30);
+    let progress = ((total - timeLeft) / total) * 100;
+    progressFill.style.width = progress + '%';
+  }
+
+  function nextExercise() {
+    if(isResting){
+      isResting = false;
+      currentIndex++;
+      if(currentIndex >= exercises.length){
+        alert('Scheda completata! Ottimo lavoro 💪');
+        resetWorkout();
+        return;
+      }
+      showExercise();
+      return;
+    }
+    if(exercises[currentIndex]?.type === 'reps'){
+      // tempo stimato per ripetizioni (30 sec)
+      isResting = true;
+      exerciseNameDisplay.textContent = `Riposo - ${restTime} sec`;
+      startTimer(restTime);
+    } else {
+      // se era esercizio a tempo, si parte con riposo ora
+      isResting = true;
+      exerciseNameDisplay.textContent = `Riposo - ${restTime} sec`;
+      startTimer(restTime);
+    }
+  }
+
+  function showExercise() {
+    isResting = false;
+    const ex = exercises[currentIndex];
+    exerciseNameDisplay.textContent = `${ex.name} (${ex.type === 'time' ? ex.value + ' sec' : ex.value + ' reps'})`;
+    if(ex.type === 'time'){
+      startTimer(ex.value);
+    } else {
+      // per esercizi a ripetizioni, timer standard di 30 sec per esecuzione
+      startTimer(30);
+    }
+  }
+
+  function resetWorkout() {
+    clearInterval(timer);
+    currentIndex = 0;
+    isPaused = false;
+    isResting = false;
+    timerSection.style.display = 'none';
+    document.getElementById('custom-scheda-section').style.display = 'block';
+    document.querySelector('.schede-btns').style.display = 'flex';
+  }
+
+  // Controlli timer
+  pauseBtn.onclick = () => {
+    isPaused = true;
+    pauseBtn.style.display = 'none';
+    resumeBtn.style.display = 'inline-block';
+  };
+  resumeBtn.onclick = () => {
+    isPaused = false;
+    pauseBtn.style.display = 'inline-block';
+    resumeBtn.style.display = 'none';
+  };
+  resetBtn.onclick = () => {
+    clearInterval(timer);
+    showExercise();
+  };
+  stopBtn.onclick = () => {
+    resetWorkout();
+  };
+
+  // Salva e avvia la scheda
+  saveSchedaBtn.onclick = () => {
+    if(exercises.length === 0){
+      alert('Aggiungi almeno un esercizio!');
+      return;
+    }
+    restTime = parseInt(restTimeInput.value) || 15;
+    document.getElementById('custom-scheda-section').style.display = 'none';
+    document.querySelector('.schede-btns').style.display = 'none';
+    timerSection.style.display = 'block';
+    currentIndex = 0;
+    showExercise();
+  };
+</script>
+</body>
+</html>
